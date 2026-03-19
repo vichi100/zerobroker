@@ -13,6 +13,16 @@
   --mesh-from: #111111;
   --mesh-via: #0e0e0e;
   --mesh-to: #0e0e0e;
+  --brand-purple: #7f5af0;
+  --brand-emerald: #2cb67d;
+  --brand-red: #ff2c2c;
+}
+
+.brand-text {
+  background: linear-gradient(90deg, var(--brand-purple), var(--brand-emerald));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* ── BLUE MESH THEME ─────────────────────────────────── */

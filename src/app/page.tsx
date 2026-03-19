@@ -15,7 +15,13 @@ export default function Home() {
     { id: 1, type: "WANT", text: "I am looking for a 2bhk in Andheri West in 40-60k rent" },
     { id: 2, type: "HAVE", text: "I have 2bkh in andheri west rent is 55k" },
   ]);
+  const [showInitialGlow, setShowInitialGlow] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowInitialGlow(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     // Apply theme class on change
@@ -57,19 +63,29 @@ export default function Home() {
   // Validation logic
   const hasProperty = /(?:1|2|3|4|5)\s*bhk|apartment|flat|studio|house|room|office|shop|godown|warehouse|commercial|land|plot/i.test(input);
   const hasLocation = /(?:in|at|near|around)\s+[a-z0-9]+/i.test(input);
-  const hasBudget = /\d+\s*(?:k|l|lac|lakh|thousand|cr|rs|inr)|rent|budget|price|buy|lease|sale/i.test(input);
+  const hasBudget = /\d+\s*(?:k|l|lac|lakh|thousand|cr|rs|inr)/i.test(input);
+  const intentMatch = input.match(/\b(rent|buy|lease|sell|sale|resale|pg|commercial)\b/i);
+  const detectedIntent = intentMatch ? intentMatch[1].toUpperCase() : "Type";
 
   const toggleTheme = () => setTheme(theme === "blue" ? "dark" : "blue");
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
-      <header className="fixed top-0 w-full p-8 flex justify-between items-center max-w-6xl z-50">
-        <div className="text-2xl font-bold tracking-tighter">ZERO<span className="gradient-text">BROKER</span></div>
+      <header className="absolute top-0 w-full p-8 flex justify-center md:justify-between items-center max-w-6xl z-50">
+        <div className="flex flex-col items-center md:items-start">
+          <div className="text-2xl font-bold tracking-tighter">
+            <span className="text-[#ff2c2c]">ZERO</span>
+            <span className="brand-text">BROKER</span>
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-medium md:hidden mt-0.5">
+            Real Estate, Deciphered by AI
+          </div>
+        </div>
 
         <div className="flex items-center gap-6">
           <button
             onClick={toggleTheme}
-            className={`p-2 rounded-full glass transition-all cursor-pointer ${theme === "blue" ? "text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]" : "text-gray-400"}`}
+            className={`hidden md:flex p-2 rounded-full glass transition-all cursor-pointer ${theme === "blue" ? "text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]" : "text-gray-400"}`}
             title={`Switch to ${theme === "blue" ? "Dark" : "Blue"} Mode`}
           >
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -87,20 +103,20 @@ export default function Home() {
             <span className="gradient-text">Searching is Over.</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            You describe it. We find it. No filters, no endless scrolling, no noise. <br className="hidden md:block" />
+            You say it. We find it. No filters, no endless scrolling, no noise. <br className="hidden md:block" />
             Just your requirement and our AI on the hunt.
           </p>
         </div>
 
-        <div className="glass ai-glow rounded-[2rem] p-4 relative group transition-all duration-300 focus-within:ring-2 ring-blue-500/30">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className={`glass rounded-[2rem] px-4 py-2 relative group transition-all duration-700 ${showInitialGlow ? 'ai-glow' : ''}`}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-1">
             <textarea
               ref={textareaRef}
               rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="I'm looking for 2BHK in Andheri West for 40-60k rent..."
-              className="w-full bg-transparent p-2 text-xl outline-none resize-none placeholder:text-gray-600 text-foreground min-h-[60px]"
+              className="w-full bg-transparent p-2 py-1 text-lg leading-tight outline-none resize-none overflow-hidden placeholder:text-gray-600 text-foreground min-h-[28px]"
             />
 
             <div className="flex items-center justify-between mt-2">
@@ -132,8 +148,9 @@ export default function Home() {
 
           {/* Guidance Checklist */}
           {input.length > 0 && (
-            <div className="flex gap-4 px-2 mt-4 pt-4 border-t border-white/5 text-[10px] items-center">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 px-2 mt-4 pt-4 border-t border-white/5 text-[10px] items-center">
               {[
+                { label: detectedIntent, valid: !!intentMatch },
                 { label: "Property", valid: hasProperty },
                 { label: "Location", valid: hasLocation },
                 { label: "Budget", valid: hasBudget },
