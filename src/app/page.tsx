@@ -16,7 +16,22 @@ export default function Home() {
     { id: 2, type: "HAVE", text: "I have 2bkh in andheri west rent is 55k" },
   ]);
   const [showInitialGlow, setShowInitialGlow] = useState(true);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const placeholders = [
+    "I'm looking for 2BHK in Andheri West for 40-60k rent...",
+    "Looking for a budget-friendly flat near Khar station...",
+    "I want to buy a 3BHK penthouse in South Mumbai...",
+    "Find me a studio apartment in Bandra for under 30k..."
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowInitialGlow(false), 1000);
@@ -74,8 +89,8 @@ export default function Home() {
       <header className="absolute top-0 w-full p-8 flex justify-center md:justify-between items-center max-w-6xl z-50">
         <div className="flex flex-col items-center md:items-start">
           <div className="text-2xl font-bold tracking-tighter">
-            <span className="text-[#ff2c2c]">ZERO</span>
-            <span className="brand-text">BROKER</span>
+            <span className="text-[#ff2c2c]"></span>
+            <span className="brand-text">MOVEINTODAY</span>
           </div>
           <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-medium md:hidden mt-0.5">
             Real Estate, Deciphered by AI
@@ -96,14 +111,14 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="w-full max-w-3xl space-y-12 z-10 pt-20">
+      <main className="w-full max-w-3xl space-y-16 md:space-y-20 z-10 pt-32 md:pt-40">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight mb-8">
 
             <span className="gradient-text">Searching is Over.</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            You say it. We find it. No filters, no endless scrolling, no noise. <br className="hidden md:block" />
+            <span className="hidden md:inline">You say it. We find it. No filters, no endless scrolling, no noise. </span>
             Just your requirement and our AI on the hunt.
           </p>
         </div>
@@ -115,8 +130,8 @@ export default function Home() {
               rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="I'm looking for 2BHK in Andheri West for 40-60k rent..."
-              className="w-full bg-transparent p-2 py-1 text-lg leading-tight outline-none resize-none overflow-hidden placeholder:text-gray-600 text-foreground min-h-[28px]"
+              placeholder={placeholders[placeholderIndex]}
+              className="w-full bg-transparent p-2 py-1 text-lg leading-tight outline-none resize-none overflow-hidden placeholder:text-white/40 text-foreground min-h-[28px] transition-all duration-700"
             />
 
             <div className="flex items-center justify-between mt-2">
@@ -175,9 +190,9 @@ export default function Home() {
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6 pb-24">
           <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">Recent Listings</h3>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {feed.map((listing, index) => (
               <div
                 key={listing.id}
