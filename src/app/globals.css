@@ -2,17 +2,17 @@
 
 /* ── PURE DARK (DEFAULT) ─────────────────────────────── */
 :root {
-  --background: #0e0e0e;
-  --foreground: #e3e3e3;
+  --background: #1a1a1a;
+  --foreground: #d1d1d1;
   --primary: #ffffff;
-  /* Neutral White for default */
-  --secondary: #a3a3a3;
-  /* Neutral Grey for default */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.05);
-  --mesh-from: #111111;
-  --mesh-via: #0e0e0e;
-  --mesh-to: #0e0e0e;
+  /* Neutral White */
+  --secondary: #949494;
+  /* Soft Grey */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --mesh-from: #1c1c1c;
+  --mesh-via: #1a1a1a;
+  --mesh-to: #1a1a1a;
   --brand-purple: #7f5af0;
   --brand-emerald: #2cb67d;
   --brand-red: #ff2c2c;
@@ -27,17 +27,15 @@
 
 /* ── BLUE MESH THEME ─────────────────────────────────── */
 .blue-theme {
-  --background: #080c1a;
-  --foreground: #e8eaf6;
+  --background: #141621;
+  --foreground: #e1e3ed;
   --primary: #4f8ef7;
-  /* Vibrant Blue */
   --secondary: #a855f7;
-  /* Vibrant Purple */
-  --glass-bg: rgba(79, 142, 247, 0.05);
-  --glass-border: rgba(79, 142, 247, 0.2);
-  --mesh-from: #1a1464;
-  --mesh-via: #0e1a3d;
-  --mesh-to: #080c1a;
+  --glass-bg: rgba(79, 142, 247, 0.03);
+  --glass-border: rgba(79, 142, 247, 0.15);
+  --mesh-from: #1a164d;
+  --mesh-via: #151a30;
+  --mesh-to: #141621;
 }
 
 @theme inline {
@@ -72,7 +70,7 @@
 
   /* Default Pure-dark mesh (solid black) */
   :root .mesh-bg {
-    background: #0e0e0e;
+    background: #1a1a1a;
   }
 
   /* Blue theme mesh (gradients + blobs) */

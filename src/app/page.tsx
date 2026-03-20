@@ -145,7 +145,7 @@ export default function Home() {
   const toggleTheme = () => setTheme(theme === "blue" ? "dark" : "blue");
 
   return (
-    <div className={`min-h-screen ${theme === "blue" ? "bg-[#0a0a0b]" : "bg-black"} flex flex-col items-center justify-center p-4 pt-0 md:p-6 md:pt-0 relative`}>
+    <div className={`min-h-screen ${theme === "blue" ? "blue-theme" : ""} bg-background text-foreground flex flex-col items-center justify-center p-4 pt-0 md:p-6 md:pt-0 relative transition-colors duration-500`}>
       <header className="sticky top-0 w-full px-4 py-3 md:px-8 md:py-4 flex justify-between items-center max-w-6xl z-50 bg-transparent backdrop-blur-xl">
         <div className="flex items-center gap-2.5">
           <div className="relative group">
