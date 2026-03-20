@@ -85,14 +85,14 @@ export default function Home() {
   const toggleTheme = () => setTheme(theme === "blue" ? "dark" : "blue");
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
-      <header className="absolute top-0 w-full p-8 flex justify-center md:justify-between items-center max-w-6xl z-50">
-        <div className="flex flex-col items-center md:items-start">
-          <div className="text-2xl font-bold tracking-tighter">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6 relative">
+      <header className="sticky top-0 w-full px-2 py-1 md:px-6 md:py-3 flex justify-between items-center max-w-6xl z-50 bg-background/80 backdrop-blur-md">
+        <div className="flex flex-col items-start">
+          <div className="text-1xl font-bold tracking-tighter">
             <span className="text-[#ff2c2c]"></span>
             <span className="brand-text">MOVEINTODAY</span>
           </div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-medium md:hidden mt-0.5">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-medium md:hidden mt-0.5">
             Real Estate, Deciphered by AI
           </div>
         </div>
@@ -100,20 +100,20 @@ export default function Home() {
         <div className="flex items-center gap-6">
           <button
             onClick={toggleTheme}
-            className={`hidden md:flex p-2 rounded-full glass transition-all cursor-pointer ${theme === "blue" ? "text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]" : "text-gray-400"}`}
+            className={`hidden md:flex p-1.5 rounded-full glass transition-all cursor-pointer ${theme === "blue" ? "text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]" : "text-gray-400"}`}
             title={`Switch to ${theme === "blue" ? "Dark" : "Blue"} Mode`}
           >
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
             </svg>
           </button>
-          <div className="hidden md:block text-sm text-gray-400 uppercase tracking-widest">Real Estate, Deciphered by AI</div>
+          <div className="hidden md:block text-xs text-white/60 uppercase tracking-widest">Real Estate, Deciphered by AI</div>
         </div>
       </header>
 
-      <main className="w-full max-w-3xl space-y-16 md:space-y-20 z-10 pt-32 md:pt-40">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight mb-8">
+      <main className="w-full max-w-3xl space-y-12 md:space-y-20 z-10 pt-10 md:pt-10">
+        <div className="text-center space-y-20 md:space-y-4 mb-30 md:mb-20">
+          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight mb-2 md:mb-8">
 
             <span className="gradient-text">Searching is Over.</span>
           </h1>
@@ -190,7 +190,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="space-y-6 pb-24">
+        <div className="space-y-6 pb-4">
           <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">Recent Listings</h3>
           <div className="space-y-4">
             {feed.map((listing, index) => (
@@ -209,7 +209,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="fixed bottom-8 text-gray-600 text-[10px] uppercase tracking-widest z-50">
+      <footer className="w-full py-4 text-center text-white/60 text-[10px] uppercase tracking-widest opacity-80">
         ZeroBroker Engine v2.0 &copy; 2026
       </footer>
     </div>
