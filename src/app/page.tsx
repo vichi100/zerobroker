@@ -8,6 +8,13 @@ interface Listing {
   text: string;
 }
 
+const BrandIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="2.5" />
+    <path d="M9 9L15 15M15 15H11M15 15V11" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export default function Home() {
   const [input, setInput] = useState("");
   const [theme, setTheme] = useState<"blue" | "dark">("dark");
@@ -20,6 +27,14 @@ export default function Home() {
   const [isZeroBroker, setIsZeroBroker] = useState(true);
   const [isOkBroker, setIsOkBroker] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  // Auth State
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authStep, setAuthStep] = useState<"phone" | "otp">("phone");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,7 +93,11 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+    setShowAuthModal(true);
+    setAuthStep("phone");
+  };
 
+  const handleFinalSubmit = () => {
     const lowerText = input.toLowerCase();
     const type = (lowerText.includes("looking") || lowerText.includes("want") || lowerText.includes("need")) ? "WANT" : "HAVE";
 
@@ -91,10 +110,33 @@ export default function Home() {
     setFeed([newListing, ...feed]);
     setInput("");
     setSelectedImages([]);
+    setShowAuthModal(false);
+    setPhoneNumber("");
+    setOtp("");
+  };
+
+  const handleSendOtp = () => {
+    if (phoneNumber.length === 10) {
+      setIsVerifying(true);
+      setTimeout(() => {
+        setAuthStep("otp");
+        setIsVerifying(false);
+      }, 1000);
+    }
+  };
+
+  const handleVerifyOtp = () => {
+    if (otp.length === 6) {
+      setIsVerifying(true);
+      setTimeout(() => {
+        setIsVerifying(false);
+        handleFinalSubmit();
+      }, 1000);
+    }
   };
 
   // Validation logic
-  const hasProperty = /(?:1|2|3|4|5|one|two|three|four|five)\s*bhk|apartment|flat|studio|house|room|office|shop|godown|warehouse|commercial|land|plot/i.test(input);
+  const hasProperty = /(?:1|2|3|4|5|one|two|three|four|five)\s*(?:bhk|rk|hall|kitchen|bedroom|living)|apartment|flat|studio|house|room|office|shop|godown|warehouse|commercial|land|plot/i.test(input);
   const hasLocation = /(?:in|at|near|around)\s+[a-z0-9]+/i.test(input);
   const hasBudget = /(?:\d+|one|two|three|four|five|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\s*(?:k|l|lac|lakh|thousand|thousend|cr|rs|inr)/i.test(input);
   const intentMatch = input.match(/\b(rent|buy|lease|sell|sale|resale|pg|commercial)\b/i);
@@ -103,15 +145,20 @@ export default function Home() {
   const toggleTheme = () => setTheme(theme === "blue" ? "dark" : "blue");
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6 relative">
-      <header className="sticky top-0 w-full px-2 py-1 md:px-6 md:py-3 flex justify-between items-center max-w-6xl z-50 bg-background/80 backdrop-blur-md">
-        <div className="flex flex-col items-start">
-          <div className="text-1xl font-bold tracking-tighter">
-            <span className="text-[#ff2c2c]"></span>
-            <span className="brand-text">MOVEINTODAY</span>
+    <div className={`min-h-screen ${theme === "blue" ? "bg-[#0a0a0b]" : "bg-black"} flex flex-col items-center justify-center p-4 pt-0 md:p-6 md:pt-0 relative`}>
+      <header className="sticky top-0 w-full px-4 py-3 md:px-8 md:py-4 flex justify-between items-center max-w-6xl z-50 bg-transparent backdrop-blur-xl">
+        <div className="flex items-center gap-2.5">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <BrandIcon className="relative w-8 h-8 md:w-9 md:h-9 text-blue-500" />
           </div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-medium md:hidden mt-0.5">
-            Real Estate, Deciphered by AI
+          <div className="flex flex-col items-start leading-none">
+            <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+              MOVEINTODAY
+            </h1>
+            <p className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
+              Real Estate, Deciphered by AI
+            </p>
           </div>
         </div>
 
@@ -125,7 +172,6 @@ export default function Home() {
               <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
             </svg>
           </button>
-          <div className="hidden md:block text-xs text-white/60 uppercase tracking-widest">Real Estate, Deciphered by AI</div>
         </div>
       </header>
 
@@ -305,6 +351,93 @@ export default function Home() {
       <footer className="w-full py-4 text-center text-white/60 text-[10px] uppercase tracking-widest opacity-80">
         ZeroBroker Engine v2.0 &copy; 2026
       </footer>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/40 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="glass w-full max-w-sm rounded-[2rem] p-8 relative animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+
+            {authStep === "phone" ? (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold tracking-tight">Verify Mobile</h2>
+                  <p className="text-sm text-gray-400">Enter your 10-digit mobile number to post.</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="relative group flex items-center bg-white/5 border border-white/10 rounded-xl focus-within:border-blue-500/50 transition-all w-full max-w-[280px]">
+                      <span className="pl-4 pr-3 text-gray-500 font-mono text-lg border-r border-white/5 shrink-0">+91</span>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                        placeholder="9876543210"
+                        className="w-full bg-transparent px-3 py-3 outline-none text-lg tracking-[0.1em] font-mono text-center pr-[40px]"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSendOtp}
+                    disabled={phoneNumber.length !== 10 || isVerifying}
+                    className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                  >
+                    {isVerifying ? (
+                      <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      "Send OTP"
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold tracking-tight">Enter OTP</h2>
+                  <p className="text-sm text-gray-400">We've sent a code to +91 {phoneNumber}</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="relative group flex justify-center">
+                    <input
+                      type="tel"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                      placeholder="000000"
+                      className="w-full max-w-[280px] bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500/50 transition-all text-2xl tracking-[0.5em] text-center font-mono"
+                    />
+                  </div>
+                  <button
+                    onClick={handleVerifyOtp}
+                    disabled={otp.length !== 6 || isVerifying}
+                    className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+                  >
+                    {isVerifying ? (
+                      <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      "Verify & Post"
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setAuthStep("phone")}
+                    className="w-full text-xs text-gray-500 hover:text-white transition-colors"
+                  >
+                    Wrong number? Change it
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
