@@ -20,6 +20,19 @@ const BrandIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const PLACEHOLDERS = [
+  "I'm looking for 2BHK in Andheri West for 40-60k rent...",
+  "Looking for a budget-friendly flat near Khar station...",
+  "I want to buy a 3BHK penthouse in South Mumbai...",
+  "Find me a studio apartment in Bandra for under 30k..."
+];
+
+const REGEX_PROPERTY = /(?:1|2|3|4|5|one|two|three|four|five)\s*(?:bhk|rk|hall|kitchen|bedroom|living)|apartment|flat|studio|house|room|office|shop|godown|warehouse|commercial|land|plot/i;
+const REGEX_LOCATION = /(?:in|at|near|around)\s+[a-z0-9]+/i;
+const REGEX_BUDGET = /(?:\d+|one|two|three|four|five|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\s*(?:k|l|lac|lakh|thousand|thousend|cr|rs|inr)/i;
+const REGEX_INTENT = /\b(rent|buy|lease|sell|sale|resale|pg|commercial|have|post|listing|listed)\b/i;
+const REGEX_POST_INTENT = /(?:have|post|sell|sale|renting out|listing)/i;
+
 export default function Home() {
   const [input, setInput] = useState("");
   const [theme, setTheme] = useState<"blue" | "dark">("dark");
@@ -27,7 +40,6 @@ export default function Home() {
     { id: 1, type: "WANT", text: "I am looking for a 2bhk in Andheri West in 40-60k rent" },
     { id: 2, type: "HAVE", text: "I have 2bkh in andheri west rent is 55k" },
   ]);
-  const [showInitialGlow, setShowInitialGlow] = useState(true);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isZeroBroker, setIsZeroBroker] = useState(true);
   const [isOkBroker, setIsOkBroker] = useState(false);
@@ -46,23 +58,11 @@ export default function Home() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const placeholders = [
-    "I'm looking for 2BHK in Andheri West for 40-60k rent...",
-    "Looking for a budget-friendly flat near Khar station...",
-    "I want to buy a 3BHK penthouse in South Mumbai...",
-    "Find me a studio apartment in Bandra for under 30k..."
-  ];
-
   useEffect(() => {
     const interval = setInterval(() => {
-      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
+      setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDERS.length);
     }, 7000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowInitialGlow(false), 1000);
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -122,6 +122,7 @@ export default function Home() {
     setShowAuthModal(false);
     setPhoneNumber("");
     setOtp("");
+    setIsVerifying(false);
     setShowPostSuccessModal(true);
   };
 
@@ -146,12 +147,12 @@ export default function Home() {
   };
 
   // Validation logic
-  const hasProperty = /(?:1|2|3|4|5|one|two|three|four|five)\s*(?:bhk|rk|hall|kitchen|bedroom|living)|apartment|flat|studio|house|room|office|shop|godown|warehouse|commercial|land|plot/i.test(input);
-  const hasLocation = /(?:in|at|near|around)\s+[a-z0-9]+/i.test(input);
-  const hasBudget = /(?:\d+|one|two|three|four|five|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\s*(?:k|l|lac|lakh|thousand|thousend|cr|rs|inr)/i.test(input);
-  const intentMatch = input.match(/\b(rent|buy|lease|sell|sale|resale|pg|commercial)\b/i);
+  const hasProperty = REGEX_PROPERTY.test(input);
+  const hasLocation = REGEX_LOCATION.test(input);
+  const hasBudget = REGEX_BUDGET.test(input);
+  const intentMatch = input.match(REGEX_INTENT);
   const detectedIntent = intentMatch ? intentMatch[1].toUpperCase() : "Type";
-  const isPostIntent = /(?:have|post|sell|sale|renting out|listing)/i.test(input);
+  const isPostIntent = REGEX_POST_INTENT.test(input);
 
   const toggleTheme = () => setTheme(theme === "blue" ? "dark" : "blue");
 
@@ -199,7 +200,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col">
-          <div className={`glass rounded-[2rem] px-4 py-2 relative group transition-all duration-700 ${showInitialGlow ? "ai-glow" : ""}`}>
+          <div className="glass rounded-[2rem] px-4 py-2 relative group transition-all duration-700 ai-initial-glow">
             <form onSubmit={handleSubmit} className="flex flex-col gap-1">
               {/* Hidden File Input */}
               <input
@@ -236,7 +237,7 @@ export default function Home() {
                 rows={1}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={placeholders[placeholderIndex]}
+                placeholder={PLACEHOLDERS[placeholderIndex]}
                 className="w-full bg-transparent p-2 py-1 text-lg leading-tight outline-none resize-none overflow-hidden placeholder:text-white/40 text-foreground min-h-[28px] transition-all duration-700"
               />
 
@@ -488,8 +489,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-2">
-                <h2 className="text-2xl font-black tracking-tight text-white uppercase italic">Reward Program</h2>
-                <p className="text-sm text-white/40 font-bold tracking-wide uppercase">Earnings for verified visits</p>
+                <h2 className="text-1.5xl font-black tracking-tight text-white uppercase italic">Reward Program</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
@@ -498,7 +498,7 @@ export default function Home() {
                     <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-black">For Owners</span>
                     <span className="text-lg font-black text-white">₹100</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-white/60 font-medium">
+                  <p className="text-[12px] leading-relaxed text-white/60 font-medium">
                     Post your property with images. Earn rewards for every verified visit from our customers.
                   </p>
                 </div>
@@ -508,22 +508,22 @@ export default function Home() {
                     <span className="text-[10px] uppercase tracking-widest text-blue-400 font-black">For Customers</span>
                     <span className="text-lg font-black text-white">₹50</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-white/60 font-medium">
+                  <p className="text-[12px] leading-relaxed text-white/60 font-medium">
                     Earn rewards for every verified property visit you complete across our listings.
                   </p>
                 </div>
               </div>
 
               <div className="w-full glass p-5 rounded-2xl border-white/5 text-left space-y-4">
-                <span className="text-[10px] uppercase tracking-widest text-white/30 font-black">How it works</span>
+                <span className="text-[10px] uppercase tracking-widest text-white/70 font-black mb-2 block">How it works</span>
                 <div className="space-y-3">
                   <div className="flex gap-3">
                     <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full border border-white/10 flex items-center justify-center text-[9px] font-black text-white/40">1</div>
-                    <p className="text-[11px] text-white/60 leading-relaxed font-medium">After listing, owners receive a unique Visit Verification Link in their SMS/dashboard.</p>
+                    <p className="text-[12px] text-white/60 leading-relaxed font-medium">After listing, owners receive a unique Visit Verification Link in their SMS/dashboard.</p>
                   </div>
                   <div className="flex gap-3">
                     <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full border border-white/10 flex items-center justify-center text-[9px] font-black text-white/40">2</div>
-                    <p className="text-[11px] text-white/60 leading-relaxed font-medium">During a visit, the owner enters the customer's number; an OTP is sent to customer to verify. both earn instantly!</p>
+                    <p className="text-[12px] text-white/60 leading-relaxed font-medium">During a visit, the owner enters the customer's number; an OTP is sent to customer to verify. both earn instantly!</p>
                   </div>
                 </div>
               </div>
@@ -555,8 +555,8 @@ export default function Home() {
 
               {/* Foreground Content (Original Tags) */}
               <div className="relative z-10 flex flex-col items-center">
-                <h2 className="text-2xl font-black text-white/80 uppercase italic tracking-tight leading-none mb-1">Verified!</h2>
-                <p className="text-sm text-white/40 font-bold uppercase tracking-widest">Listing is now live</p>
+                <h2 className="text-2xl font-black text-white/70 uppercase italic tracking-tight leading-none mb-[6px]">Verified!</h2>
+                <p className="text-sm text-white/60 font-bold uppercase tracking-widest">Listing is now <span className="text-emerald-400 animate-blink">live</span></p>
               </div>
             </div>
 
@@ -567,8 +567,8 @@ export default function Home() {
                     <SparklesIcon size={16} />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-white/80 uppercase tracking-normal">AI-Matching Search Active</p>
-                    <p className="text-[11px] text-white/70 leading-relaxed">Relax—no need to visit again. Our AI will continuously find your perfect match.</p>
+                    <p className="text-xs font-black text-white/75 uppercase tracking-normal">AI-Matching Search Active</p>
+                    <p className="text-[13px] text-white/70 leading-relaxed">Relax—no need to visit again. Our AI will continuously find your perfect match.</p>
                   </div>
                 </div>
 
@@ -577,8 +577,8 @@ export default function Home() {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-white/80 uppercase tracking-tight">Direct Mobile Alerts</p>
-                    <p className="text-[11px] text-white/70 leading-relaxed">We'll send property links or lead details directly to your WhatsApp or SMS.</p>
+                    <p className="text-xs font-black text-white/75 uppercase tracking-tight">Direct Mobile Alerts</p>
+                    <p className="text-[13px] text-white/70 leading-relaxed">We'll send property links or lead details directly to your WhatsApp or SMS.</p>
                   </div>
                 </div>
 
@@ -587,8 +587,8 @@ export default function Home() {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-white/80 uppercase tracking-tight">Respectful Timing</p>
-                    <p className="text-[11px] text-white/70 leading-relaxed">Updates are sent only between 10 AM – 8 PM. No spam, ever.</p>
+                    <p className="text-xs font-black text-white/75 uppercase tracking-tight">Respectful Timing</p>
+                    <p className="text-[13px] text-white/70 leading-relaxed">Updates are sent only between 10 AM – 8 PM. No spam, ever.</p>
                   </div>
                 </div>
 
@@ -597,8 +597,8 @@ export default function Home() {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-white/80 uppercase tracking-tight">Privacy Guaranteed</p>
-                    <p className="text-[11px] text-white/70 leading-relaxed">Your number is strictly private and never shared with brokers.</p>
+                    <p className="text-xs font-black text-white/75 uppercase tracking-tight">Privacy Guaranteed</p>
+                    <p className="text-[13px] text-white/70 leading-relaxed">Your number is strictly private and never shared with brokers.</p>
                   </div>
                 </div>
               </div>

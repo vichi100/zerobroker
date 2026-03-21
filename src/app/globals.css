@@ -101,6 +101,10 @@
     color: transparent;
   }
 
+  .ai-initial-glow {
+    animation: fadeOutGlow 2.5s ease-out forwards;
+  }
+
   .animate-pulse-slow {
     animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
@@ -133,4 +137,34 @@
   50% {
     opacity: .7;
   }
+}
+
+@keyframes fadeOutGlow {
+  0% {
+    box-shadow: 0 0 60px -15px var(--primary);
+  }
+
+  70% {
+    box-shadow: 0 0 60px -15px var(--primary);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.animate-blink {
+  animation: blink 2.5s cubic-bezier(0.4, 0, 0, 1) infinite;
 }
