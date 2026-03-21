@@ -1,6 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+const SparklesIcon = ({ className, size = 24 }: { className?: string; size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+  </svg>
+);
 
 interface Listing {
   id: number;
@@ -34,6 +39,9 @@ export default function Home() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [address, setAddress] = useState("");
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [showPostSuccessModal, setShowPostSuccessModal] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,10 +117,12 @@ export default function Home() {
 
     setFeed([newListing, ...feed]);
     setInput("");
+    setAddress("");
     setSelectedImages([]);
     setShowAuthModal(false);
     setPhoneNumber("");
     setOtp("");
+    setShowPostSuccessModal(true);
   };
 
   const handleSendOtp = () => {
@@ -141,12 +151,13 @@ export default function Home() {
   const hasBudget = /(?:\d+|one|two|three|four|five|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\s*(?:k|l|lac|lakh|thousand|thousend|cr|rs|inr)/i.test(input);
   const intentMatch = input.match(/\b(rent|buy|lease|sell|sale|resale|pg|commercial)\b/i);
   const detectedIntent = intentMatch ? intentMatch[1].toUpperCase() : "Type";
+  const isPostIntent = /(?:have|post|sell|sale|renting out|listing)/i.test(input);
 
   const toggleTheme = () => setTheme(theme === "blue" ? "dark" : "blue");
 
   return (
     <div className={`min-h-screen ${theme === "blue" ? "blue-theme" : ""} bg-background text-foreground flex flex-col items-center justify-center p-4 pt-0 md:p-6 md:pt-0 relative transition-colors duration-500`}>
-      <header className="sticky top-0 w-full px-4 py-3 md:px-8 md:py-4 flex justify-between items-center max-w-6xl z-50 bg-transparent backdrop-blur-xl">
+      <header className="sticky top-0 w-full px-4 py-3 md:px-8 md:py-4 flex justify-between items-center max-w-6xl z-[100] bg-transparent backdrop-blur-xl">
         <div className="flex items-center gap-2.5">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
@@ -273,61 +284,82 @@ export default function Home() {
                 ].map((item, i) => (
                   <div
                     key={i}
-                    className={`flex items-center gap-1.5 transition-colors ${item.valid ? "text-green-400" : "text-gray-400"}`}
+                    className="flex items-center gap-1.5 transition-colors group"
                   >
-                    <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${item.valid ? "bg-green-400/20" : "bg-gray-400/10"}`}>
+                    <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${item.valid ? "bg-green-400/20 text-green-400" : "bg-white/5 text-white/20"}`}>
                       {item.valid ? (
                         <svg viewBox="0 0 20 20" fill="currentColor" className="w-2.5 h-2.5">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       ) : (
-                        <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                        <div className="w-0.5 h-0.5 bg-white/20 rounded-full" />
                       )}
                     </div>
-                    <span className="uppercase tracking-widest font-bold">{item.label}</span>
+                    <span className="uppercase tracking-widest font-bold text-white/40">{item.label}</span>
                   </div>
                 ))}
               </div>
             )}
+
+            {/* Smart Posting Extras */}
+            {isPostIntent && hasProperty && hasLocation && hasBudget && (
+              <div className="mt-6 pt-6 border-t border-white/5 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] uppercase tracking-widest text-white/40 font-black ml-2">Exact Address</label>
+                  <input
+                    type="text"
+                    placeholder="Building, Street, Landmark..."
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="glass w-full px-4 py-3 rounded-2xl outline-none text-sm placeholder:text-white/20 text-foreground transition-all focus:border-emerald-500/30"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Broker Preferences */}
-          <div className="flex gap-4 px-6 mt-[10px] text-[10px] uppercase tracking-wider font-bold">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={isZeroBroker}
-                onChange={(e) => setIsZeroBroker(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-4 h-4 rounded border border-white/20 flex items-center justify-center peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-all">
-                {isZeroBroker && (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                )}
-              </div>
-              <span className={`${isZeroBroker ? "text-blue-400" : "text-gray-500"} group-hover:text-white transition-colors`}>Zero Broker</span>
-            </label>
+          {/* Broker Preferences & Reward */}
+          <div className="flex items-center justify-between px-6 mt-[10px]">
+            <div className="flex gap-4 text-[10px] uppercase tracking-wider font-bold">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={isZeroBroker}
+                  onChange={(e) => setIsZeroBroker(e.target.checked)}
+                  className="hidden"
+                />
+                <div className={`w-3.5 h-3.5 rounded-sm border transition-all flex items-center justify-center ${isZeroBroker ? "bg-blue-500 border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.3)]" : "border-white/20 hover:border-white/40"}`}>
+                  {isZeroBroker && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><path d="M20 6L9 17L4 12" /></svg>}
+                </div>
+                <span className={isZeroBroker ? "text-blue-400" : "text-white/40 group-hover:text-white/60"}>Zero Broker</span>
+              </label>
 
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={isOkBroker}
-                onChange={(e) => setIsOkBroker(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-4 h-4 rounded border border-white/20 flex items-center justify-center peer-checked:bg-purple-500 peer-checked:border-purple-500 transition-all">
-                {isOkBroker && (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                )}
-              </div>
-              <span className={`${isOkBroker ? "text-purple-400" : "text-gray-500"} group-hover:text-white transition-colors`}>Ok Broker</span>
-            </label>
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={isOkBroker}
+                  onChange={(e) => setIsOkBroker(e.target.checked)}
+                  className="hidden"
+                />
+                <div className={`w-3.5 h-3.5 rounded-sm border transition-all flex items-center justify-center ${isOkBroker ? "bg-purple-500 border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]" : "border-white/20 hover:border-white/40"}`}>
+                  {isOkBroker && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><path d="M20 6L9 17L4 12" /></svg>}
+                </div>
+                <span className={isOkBroker ? "text-purple-400" : "text-white/40 group-hover:text-white/60"}>Ok Broker</span>
+              </label>
+            </div>
+
+            <div
+              onClick={() => setShowRewardModal(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/15 text-[9px] font-black text-emerald-400 animate-pulse transition-all cursor-pointer hover:bg-emerald-500/20 active:scale-95"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+              </svg>
+              <span className="tracking-widest">GET ₹500</span>
+            </div>
           </div>
         </div>
+
 
         <div className="space-y-6 pb-4">
           <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">Recent Listings</h3>
@@ -354,7 +386,7 @@ export default function Home() {
 
       {/* Auth Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/40 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[997] flex items-center justify-center p-4 bg-background/40 backdrop-blur-md animate-in fade-in duration-300">
           <div className="glass w-full max-w-sm rounded-[2rem] p-8 relative animate-in zoom-in-95 duration-300">
             <button
               onClick={() => setShowAuthModal(false)}
@@ -435,6 +467,149 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Reward Details Modal */}
+      {showRewardModal && (
+        <div className="fixed inset-0 z-[998] flex items-end justify-center px-4 pb-0 md:pb-8">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowRewardModal(false)}
+          />
+          <div className="relative glass w-full max-w-lg rounded-t-[32px] md:rounded-[32px] p-8 pb-12 overflow-hidden animate-in slide-in-from-bottom-full duration-500 ease-out border-b-0 md:border-b">
+            {/* Decor Line */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full md:hidden" />
+
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                <SparklesIcon size={32} />
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="text-2xl font-black tracking-tight text-white uppercase italic">Reward Program</h2>
+                <p className="text-sm text-white/40 font-bold tracking-wide uppercase">Earnings for verified visits</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <div className="glass p-5 rounded-2xl border-emerald-500/20 text-left space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-black">For Owners</span>
+                    <span className="text-lg font-black text-white">₹100</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-white/60 font-medium">
+                    Post your property with images. Earn rewards for every verified visit from our customers.
+                  </p>
+                </div>
+
+                <div className="glass p-5 rounded-2xl border-blue-500/20 text-left space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-widest text-blue-400 font-black">For Customers</span>
+                    <span className="text-lg font-black text-white">₹50</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-white/60 font-medium">
+                    Earn rewards for every verified property visit you complete across our listings.
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full glass p-5 rounded-2xl border-white/5 text-left space-y-4">
+                <span className="text-[10px] uppercase tracking-widest text-white/30 font-black">How it works</span>
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full border border-white/10 flex items-center justify-center text-[9px] font-black text-white/40">1</div>
+                    <p className="text-[11px] text-white/60 leading-relaxed font-medium">After listing, owners receive a unique Visit Verification Link in their SMS/dashboard.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full border border-white/10 flex items-center justify-center text-[9px] font-black text-white/40">2</div>
+                    <p className="text-[11px] text-white/60 leading-relaxed font-medium">During a visit, the owner enters the customer's number; an OTP is sent to customer to verify. both earn instantly!</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowRewardModal(false)}
+                className="w-full py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/20 active:scale-95 transition-all shadow-xl"
+              >
+                Got It, Thanks!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Post Success Modal */}
+      {showPostSuccessModal && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-500"
+            onClick={() => setShowPostSuccessModal(false)}
+          />
+          <div className="relative glass w-full max-w-md max-h-[90vh] overflow-y-auto custom-scrollbar rounded-[32px] p-6 md:p-8 text-center space-y-[15px] animate-in slide-in-from-bottom-8 duration-500 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="relative pt-2 pb-3 flex flex-col items-center justify-center">
+              {/* Background Emerald Orb */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                <div className="w-24 h-24 rounded-full bg-emerald-500/10 shadow-[0_0_40px_rgba(16,185,129,0.2)]" />
+              </div>
+
+              {/* Foreground Content (Original Tags) */}
+              <div className="relative z-10 flex flex-col items-center">
+                <h2 className="text-2xl font-black text-white/80 uppercase italic tracking-tight leading-none mb-1">Verified!</h2>
+                <p className="text-sm text-white/40 font-bold uppercase tracking-widest">Listing is now live</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-left">
+              <div className="space-y-3">
+                <div className="flex gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+                    <SparklesIcon size={16} />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-black text-white/80 uppercase tracking-normal">AI-Matching Search Active</p>
+                    <p className="text-[11px] text-white/70 leading-relaxed">Relax—no need to visit again. Our AI will continuously find your perfect match.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-black text-white/80 uppercase tracking-tight">Direct Mobile Alerts</p>
+                    <p className="text-[11px] text-white/70 leading-relaxed">We'll send property links or lead details directly to your WhatsApp or SMS.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-xl bg-gray-500/10 flex items-center justify-center text-gray-400 shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-black text-white/80 uppercase tracking-tight">Respectful Timing</p>
+                    <p className="text-[11px] text-white/70 leading-relaxed">Updates are sent only between 10 AM – 8 PM. No spam, ever.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-black text-white/80 uppercase tracking-tight">Privacy Guaranteed</p>
+                    <p className="text-[11px] text-white/70 leading-relaxed">Your number is strictly private and never shared with brokers.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowPostSuccessModal(false)}
+              className="w-full py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/20 active:scale-95 transition-all shadow-xl"
+            >
+              Perfect, Got It!
+            </button>
           </div>
         </div>
       )}
